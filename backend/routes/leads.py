@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from services.firebase import save_lead, get_leads, update_lead
+from backend.services.firebase import save_lead, get_leads, update_lead
 
 router = APIRouter()
 
