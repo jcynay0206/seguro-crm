@@ -20,3 +20,4 @@ def get_leads():
 
 def update_lead(lead_id, data):
     return db.collection("leads").document(lead_id).update(data)
+
