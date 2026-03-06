@@ -15,3 +15,29 @@ app.include_router(bot_router, prefix="/api/bot")
 @app.get("/")
 def root():
     return {"status": "backend running"}
+from routes import calendly
+app.include_router(calendly.router)
+from fastapi import Request
+from datetime import datetime
+import uuid
+
+@app.post("/api/leads/staticforms")
+async def staticforms_webhook(request: Request):
+    data = await request.form()
+
+    lead = {
+        "id": str(uuid.uuid4()),
+        "name": data.get("name"),
+        "email": data.get("email"),
+        "phone": data.get("phone"),
+        "meta": data.get("meta"),
+        "created_at": datetime.utcnow().isoformat(),
+        "status": "nuevo",
+        "source": "staticforms"
+    }
+
+    # Guardar en Firebase
+    db.collection("leads").document(lead["id"]).set(lead)
+
+    return {"success": True, "lead": lead}
+
