@@ -1,9 +1,20 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
+import json
+
+# Leer la clave desde variable de entorno
+firebase_key_json = os.getenv("FIREBASE_KEY")
+
+if not firebase_key_json:
+    raise Exception("FIREBASE_KEY environment variable not found")
+
+# Convertir string JSON a dict
+firebase_key_dict = json.loads(firebase_key_json)
 
 # Inicializar Firebase solo una vez
 if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase-key.json")
+    cred = credentials.Certificate(firebase_key_dict)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -13,14 +24,11 @@ db = firestore.client()
 # -----------------------------
 
 def save_lead(data: dict):
-    """Guarda un lead en Firestore."""
     doc_ref = db.collection("leads").document()
     doc_ref.set(data)
     return True
 
-
 def get_leads():
-    """Obtiene todos los leads."""
     docs = db.collection("leads").stream()
     leads = []
     for doc in docs:
@@ -29,8 +37,6 @@ def get_leads():
         leads.append(item)
     return leads
 
-
 def update_lead(lead_id: str, data: dict):
-    """Actualiza un lead existente."""
     db.collection("leads").document(lead_id).update(data)
     return True
