@@ -33,14 +33,22 @@ db = firestore.client()
 def save_lead(data: dict):
     try:
         clean_data = {
-            "name": data.get("name", "").strip(),
-            "email": data.get("email", "").lower().strip(),
-            "phone": data.get("phone", "").strip(),
-            "meta": data.get("meta", ""),
-            "status": data.get("status", "nuevo"),
-            "source": data.get("source", "manual"),
+            "name": (data.get("name") or "").strip(),
+            "email": (data.get("email") or "").lower().strip(),
+            "phone": (data.get("phone") or "").strip(),
+            "meta": data.get("meta") or "",
+            "status": data.get("status") or "nuevo",
+            "source": data.get("source") or "manual",
             "created_at": datetime.utcnow().isoformat()
         }
+
+        # Validación mínima obligatoria
+        if not clean_data["name"]:
+            raise ValueError("Missing name")
+        if not clean_data["email"]:
+            raise ValueError("Missing email")
+        if not clean_data["phone"]:
+            raise ValueError("Missing phone")
 
         doc_ref = db.collection("leads").document()
         doc_ref.set(clean_data)
