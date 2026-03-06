@@ -3,6 +3,7 @@ from firebase_admin import credentials, firestore
 import os
 import json
 import tempfile
+from datetime import datetime
 
 # Leer la clave desde variable de entorno
 firebase_key_json = os.getenv("FIREBASE_KEY")
@@ -30,9 +31,26 @@ db = firestore.client()
 # -----------------------------
 
 def save_lead(data: dict):
-    doc_ref = db.collection("leads").document()
-    doc_ref.set(data)
-    return True
+    try:
+        clean_data = {
+            "name": data.get("name", "").strip(),
+            "email": data.get("email", "").lower().strip(),
+            "phone": data.get("phone", "").strip(),
+            "meta": data.get("meta", ""),
+            "status": data.get("status", "nuevo"),
+            "source": data.get("source", "manual"),
+            "created_at": datetime.utcnow().isoformat()
+        }
+
+        doc_ref = db.collection("leads").document()
+        doc_ref.set(clean_data)
+
+        return True
+
+    except Exception as e:
+        print("🔥 ERROR FIREBASE:", e)
+        raise e
+
 
 def get_leads():
     docs = db.collection("leads").stream()
@@ -43,6 +61,12 @@ def get_leads():
         leads.append(item)
     return leads
 
+
 def update_lead(lead_id: str, data: dict):
-    db.collection("leads").document(lead_id).update(data)
-    return True
+    try:
+        clean_data = {k: v for k, v in data.items() if v is not None}
+        db.collection("leads").document(lead_id).update(clean_data)
+        return True
+    except Exception as e:
+        print("🔥 ERROR UPDATE FIREBASE:", e)
+        raise e
