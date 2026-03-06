@@ -36,11 +36,28 @@ def save_lead(data: dict):
             "name": (data.get("name") or "").strip(),
             "email": (data.get("email") or "").lower().strip(),
             "phone": (data.get("phone") or "").strip(),
-            "meta": data.get("meta") or "",
-            "status": data.get("status") or "nuevo",
-            "source": data.get("source") or "manual",
+            "meta": (data.get("meta") or "").strip(),
+            "status": (data.get("status") or "nuevo").strip(),
+            "source": (data.get("source") or "manual").strip(),
             "created_at": datetime.utcnow().isoformat()
         }
+
+        # Validación mínima obligatoria
+        if not clean_data["name"]:
+            raise ValueError("Missing name")
+        if not clean_data["email"]:
+            raise ValueError("Missing email")
+        if not clean_data["phone"]:
+            raise ValueError("Missing phone")
+
+        doc_ref = db.collection("leads").document()
+        doc_ref.set(clean_data)
+
+        return True
+
+    except Exception as e:
+        print("🔥 ERROR FIREBASE:", e)
+        raise e
 
         # Validación mínima obligatoria
         if not clean_data["name"]:
