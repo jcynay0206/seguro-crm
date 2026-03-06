@@ -1,10 +1,11 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from backend.services.firebase import save_lead, get_leads, update_lead
 
 router = APIRouter()
 
 @router.post("/create")
-def create_lead(data: dict):
+async def create_lead(request: Request):
+    data = await request.json()
     save_lead(data)
     return {"status": "ok"}
 
@@ -13,6 +14,7 @@ def list_leads():
     return get_leads()
 
 @router.put("/{lead_id}")
-def edit_lead(lead_id: str, data: dict):
+async def edit_lead(lead_id: str, request: Request):
+    data = await request.json()
     update_lead(lead_id, data)
     return {"status": "updated"}
