@@ -35,9 +35,3 @@ async def staticforms_webhook(request: Request):
         "status": "nuevo",
         "source": "staticforms"
     }
-
-    # Guardar en Firebase
-    db.collection("leads").document(lead["id"]).set(lead)
-
-    return {"success": True, "lead": lead}
-
