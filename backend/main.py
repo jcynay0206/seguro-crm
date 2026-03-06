@@ -7,8 +7,8 @@ from backend.routes.bot import router as bot_router
 from datetime import datetime
 import uuid
 
-# IMPORTA TU DB DE FIREBASE
-from backend.config.firebase import db  # AJUSTA ESTA RUTA SI TU ARCHIVO ESTÁ EN OTRO LUGAR
+# IMPORTA TU DB DE FIREBASE (ajusta la ruta si tu archivo está en otro lugar)
+from backend.config.firebase import db
 
 app = FastAPI()
 
