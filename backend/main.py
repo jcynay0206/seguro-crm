@@ -1,12 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from backend.routes.leads import router as leads_router
 from backend.routes.automation import router as automation_router
 from backend.routes.alerts import router as alerts_router
 from backend.routes.bot import router as bot_router
 
+from datetime import datetime
+import uuid
+
+# IMPORTA TU DB DE FIREBASE
+from backend.config.firebase import db  # AJUSTA ESTA RUTA SI TU ARCHIVO ESTÁ EN OTRO LUGAR
+
 app = FastAPI()
 
-
+# ROUTERS PRINCIPALES
 app.include_router(leads_router, prefix="/api/leads")
 app.include_router(automation_router, prefix="/api/automation")
 app.include_router(alerts_router, prefix="/api/alerts")
@@ -15,12 +21,9 @@ app.include_router(bot_router, prefix="/api/bot")
 @app.get("/")
 def root():
     return {"status": "backend running"}
-from routes import calendly
-app.include_router(calendly.router)
-from fastapi import Request
-from datetime import datetime
-import uuid
 
+
+# 🔥 ENDPOINT ESPECIAL PARA STATICFORMS
 @app.post("/api/leads/staticforms")
 async def staticforms_webhook(request: Request):
     data = await request.form()
@@ -35,3 +38,7 @@ async def staticforms_webhook(request: Request):
         "status": "nuevo",
         "source": "staticforms"
     }
+
+    db.collection("leads").document(lead["id"]).set(lead)
+
+    return {"success": True, "lead": lead}
