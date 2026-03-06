@@ -1,23 +1,36 @@
-import os
-import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-firebase_key = os.getenv("FIREBASE_KEY")
-
+# Inicializar Firebase solo una vez
 if not firebase_admin._apps:
-    cred = credentials.Certificate(json.loads(firebase_key))
+    cred = credentials.Certificate("firebase-key.json")
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-def save_lead(data):
-    return db.collection("leads").add(data)
+# -----------------------------
+# FUNCIONES QUE USAN TUS ROUTERS
+# -----------------------------
+
+def save_lead(data: dict):
+    """Guarda un lead en Firestore."""
+    doc_ref = db.collection("leads").document()
+    doc_ref.set(data)
+    return True
+
 
 def get_leads():
+    """Obtiene todos los leads."""
     docs = db.collection("leads").stream()
-    return [{**doc.to_dict(), "id": doc.id} for doc in docs]
+    leads = []
+    for doc in docs:
+        item = doc.to_dict()
+        item["id"] = doc.id
+        leads.append(item)
+    return leads
 
-def update_lead(lead_id, data):
-    return db.collection("leads").document(lead_id).update(data)
 
+def update_lead(lead_id: str, data: dict):
+    """Actualiza un lead existente."""
+    db.collection("leads").document(lead_id).update(data)
+    return True
