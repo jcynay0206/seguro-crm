@@ -62,7 +62,13 @@ async def create_lead(request: Request):
         "meta": data.get("meta"),
         "created_at": datetime.utcnow().isoformat(),
         "status": "nuevo",
-        "source": data.get("source", "landing")
+        "source": data.get("source", "landing"),
+
+        # ============================
+        # 🔥 ASIGNACIÓN AUTOMÁTICA DEL OPERADOR
+        # ============================
+        "operator_email": "yunersy@crm.com",
+        "operator_name": "Yunersy"
     }
 
     db.collection("seguro_prospects").document(lead["id"]).set(lead)
@@ -84,7 +90,11 @@ async def staticforms_webhook(request: Request):
         "meta": data.get("meta"),
         "created_at": datetime.utcnow().isoformat(),
         "status": "nuevo",
-        "source": "staticforms"
+        "source": "staticforms",
+
+        # 🔥 MISMO OPERADOR PARA CONSISTENCIA
+        "operator_email": "yunersy@crm.com",
+        "operator_name": "Yunersy"
     }
 
     db.collection("seguro_prospects").document(lead["id"]).set(lead)
