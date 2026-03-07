@@ -30,7 +30,13 @@ class LeadUpdate(BaseModel):
 
 @router.post("/create")
 def create_lead(data: LeadCreate):
-    save_lead(data.dict())
+    lead_data = data.dict()
+
+    # 🔥 ASIGNACIÓN AUTOMÁTICA DEL OPERADOR
+    lead_data["operator_email"] = "yunersy@crm.com"
+    lead_data["operator_name"] = "Yunersy"
+
+    save_lead(lead_data)
     return {"status": "ok"}
 
 @router.get("/all")
