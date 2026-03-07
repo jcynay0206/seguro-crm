@@ -30,6 +30,16 @@ db = firestore.client()
 # FUNCIONES QUE USAN TUS ROUTERS
 # -----------------------------
 
+def create_alert(message: str):
+    """Crea una alerta visible en tu CRM."""
+    alert = {
+        "message": message,
+        "created_at": datetime.utcnow().isoformat(),
+        "read": False
+    }
+    db.collection("seguro_alerts").document().set(alert)
+
+
 def save_lead(data: dict):
     try:
         clean_data = {
@@ -50,25 +60,12 @@ def save_lead(data: dict):
         if not clean_data["phone"]:
             raise ValueError("Missing phone")
 
-        doc_ref = db.collection("leads").document()
+        # Guardar en la colección correcta para el CRM
+        doc_ref = db.collection("seguro_prospects").document()
         doc_ref.set(clean_data)
 
-        return True
-
-    except Exception as e:
-        print("🔥 ERROR FIREBASE:", e)
-        raise e
-
-        # Validación mínima obligatoria
-        if not clean_data["name"]:
-            raise ValueError("Missing name")
-        if not clean_data["email"]:
-            raise ValueError("Missing email")
-        if not clean_data["phone"]:
-            raise ValueError("Missing phone")
-
-        doc_ref = db.collection("leads").document()
-        doc_ref.set(clean_data)
+        # Crear alerta en tiempo real
+        create_alert(f"Nuevo lead: {clean_data['name']} ({clean_data['email']})")
 
         return True
 
@@ -78,7 +75,7 @@ def save_lead(data: dict):
 
 
 def get_leads():
-    docs = db.collection("leads").stream()
+    docs = db.collection("seguro_prospects").stream()
     leads = []
     for doc in docs:
         item = doc.to_dict()
@@ -90,7 +87,12 @@ def get_leads():
 def update_lead(lead_id: str, data: dict):
     try:
         clean_data = {k: v for k, v in data.items() if v is not None}
-        db.collection("leads").document(lead_id).update(clean_data)
+        db.collection("seguro_prospects").document(lead_id).update(clean_data)
+
+        # Alerta opcional cuando se actualiza un lead
+        if "status" in clean_data:
+            create_alert(f"Lead actualizado: {lead_id} → {clean_data['status']}")
+
         return True
     except Exception as e:
         print("🔥 ERROR UPDATE FIREBASE:", e)
