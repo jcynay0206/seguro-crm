@@ -64,9 +64,7 @@ async def create_lead(request: Request):
         "status": "nuevo",
         "source": data.get("source", "landing"),
 
-        # ============================
         # 🔥 ASIGNACIÓN AUTOMÁTICA DEL OPERADOR
-        # ============================
         "operator_email": "yunersy@crm.com",
         "operator_name": "Yunersy"
     }
@@ -100,3 +98,15 @@ async def staticforms_webhook(request: Request):
     db.collection("seguro_prospects").document(lead["id"]).set(lead)
 
     return {"success": True, "lead": lead}
+
+# ============================
+# 🔥 ENDPOINT PARA OBTENER OPERADOR
+# ============================
+@app.get("/api/operators/{email}")
+def get_operator(email: str):
+    doc = db.collection("operators").document(email).get()
+
+    if not doc.exists:
+        return {"error": "operator_not_found"}
+
+    return {"operator": doc.to_dict()}
