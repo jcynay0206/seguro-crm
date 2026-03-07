@@ -22,6 +22,30 @@ app.include_router(bot_router, prefix="/api/bot")
 def root():
     return {"status": "backend running"}
 
+# ENDPOINT DE TEST
+@app.get("/api/test")
+def test():
+    return {"status": "ok", "message": "backend vivo"}
+
+# ENDPOINT PARA LANDING (JSON)
+@app.post("/api/leads/create")
+async def create_lead(request: Request):
+    data = await request.json()
+
+    lead = {
+        "id": str(uuid.uuid4()),
+        "name": data.get("name"),
+        "email": data.get("email"),
+        "phone": data.get("phone"),
+        "meta": data.get("meta"),
+        "created_at": datetime.utcnow().isoformat(),
+        "status": "nuevo",
+        "source": data.get("source", "landing")
+    }
+
+    db.collection("seguro_prospects").document(lead["id"]).set(lead)
+
+    return {"success": True, "lead": lead}
 
 # ENDPOINT PARA STATICFORMS
 @app.post("/api/leads/staticforms")
@@ -39,6 +63,6 @@ async def staticforms_webhook(request: Request):
         "source": "staticforms"
     }
 
-    db.collection("leads").document(lead["id"]).set(lead)
+    db.collection("seguro_prospects").document(lead["id"]).set(lead)
 
     return {"success": True, "lead": lead}
